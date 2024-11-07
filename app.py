@@ -51,7 +51,7 @@ if 'messages' not in st.session_state:
 
 if 'assistant' not in st.session_state or 'thread' not in st.session_state:
     async def init_assistant():
-        client = get_client(url=LANGGRAPH_URL)
+        client = get_client(url=LANGGRAPH_URL, api_key=API_KEY)
         assistants = await client.assistants.search(metadata={"created_by": "system"})
         assistant = assistants[0]
         thread = await client.threads.create()
