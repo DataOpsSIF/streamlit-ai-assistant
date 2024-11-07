@@ -166,7 +166,7 @@ with st.sidebar:
 
         # Reset the thread to clear server-side history
         async def reset_thread():
-            client = get_client(url=LANGGRAPH_URL, api_key=)
+            client = get_client(url=LANGGRAPH_URL, api_key=API_KEY)
             thread = await client.threads.create()
             st.session_state['thread'] = thread
 
