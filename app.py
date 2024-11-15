@@ -4,16 +4,10 @@ from langgraph_sdk import get_client
 import nest_asyncio
 from langsmith import Client
 from dotenv import load_dotenv
-import pyautogui
 
 
 LANGGRAPH_URL = st.secrets["LANGGRAPH_CLOUD_ENDPOINT"]
 API_KEY = st.secrets["API_KEY"]
-
-
-# To set the maximum size of the containers holding chat_messages and solutions
-screen_size = pyautogui.size()
-screen_height = screen_size[-1] - 332
 
 
 # Initialize the langsmith Client for feedback submissions
