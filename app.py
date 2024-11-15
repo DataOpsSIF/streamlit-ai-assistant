@@ -2,13 +2,12 @@ import streamlit as st
 import asyncio
 from langgraph_sdk import get_client
 import nest_asyncio
+from pprint import pprint
 from langsmith import Client
-from dotenv import load_dotenv
 
 
 LANGGRAPH_URL = st.secrets["LANGGRAPH_CLOUD_ENDPOINT"]
 API_KEY = st.secrets["API_KEY"]
-
 
 # Initialize the langsmith Client for feedback submissions
 feedback_client = Client(
@@ -29,33 +28,26 @@ st.set_page_config(
         menu_items={},
     )
 
-# Hide the Streamlit top status bar
-st.markdown(
+# Hide the streamlit upper-right chrome
+st.html(
     """
     <style>
-    [data-testid="stStatusWidget"] { visibility: hidden; height: 0%; position: fixed; }
-    .stApp { max-width: auto; margin: auto; }
-    .left-column, .right-column { height: 80vh; overflow-y: auto; }
-    .left-column { padding-right: 10px; }
-    .right-column { padding-left: 10px; }
+    [data-testid="stStatusWidget"] {
+            visibility: hidden;
+            height: 0%;
+            position: fixed;
+        }
     </style>
     """,
-    unsafe_allow_html=True
 )
-
 if st.get_option("client.toolbarMode") != "minimal":
     st.set_option("client.toolbarMode", "minimal")
     st.rerun()
 
 
-# Initialize session state for messages
+# Initialize session state
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
-
-# Initialize session state for json document
-if 'solutions_json' not in st.session_state:
-    st.session_state['solutions_json'] = None
-    
 
 if 'assistant' not in st.session_state or 'thread' not in st.session_state:
     async def init_assistant():
@@ -69,7 +61,6 @@ if 'assistant' not in st.session_state or 'thread' not in st.session_state:
         st.session_state['agent_client'] = client  # Store AgentClient in session
 
     asyncio.run(init_assistant())
-
 
 
 async def handle_feedback() -> None:
@@ -111,7 +102,6 @@ async def handle_feedback() -> None:
         # Update session state to avoid duplicate feedback submissions
         st.session_state.last_feedback = (latest_run_id, feedback)
         st.toast("Feedback recorded", icon=":material/reviews:")
-
 
 
 # Config options
@@ -184,39 +174,16 @@ with st.sidebar:
 
         st.rerun()
 
-
-# Display Chat Messages
-if st.session_state['solutions_json']:
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        chat_container = st.container(height=screen_height, border=False)
-        for message in st.session_state['messages']:
-            chat_message = chat_container.chat_message("assistant" if message["role"] == "assistant" else "user")
-            chat_message.markdown(message["content"])
-    with col2:
-        with st.container(height=screen_height, border=False):
-            # If multisearch
-            if 'results' in st.session_state['solutions_json']:
-                for r in st.session_state['solutions_json']['results']:
-                    for hit in r['hits']:
-                        st.image(hit.get("thumb_image_url", ''), use_column_width=True)
-                        st.markdown(f"## [{hit.get('name', '')}]({hit['slug']})")
-                        st.markdown(f"##### {hit.get('one_sentence_description', '')}")
-                        st.markdown(hit.get('label_date', ''))
-                        st.markdown("---")
-            else:
-                for hit in st.session_state['solutions_json']['hits']:
-                    st.image(hit.get("thumb_image_url", ''), use_column_width=True)
-                    st.markdown(f"## [{hit.get('name', '')}]({hit['slug']})")
-                    st.markdown(f"##### {hit.get('one_sentence_description', '')}")
-                    st.markdown(hit.get('label_date', ""))
-                    st.markdown("---")
-else:
+# Function to display chat messages
+def display_messages():
     for message in st.session_state['messages']:
         with st.chat_message("assistant" if message["role"] == "assistant" else "user"):
             st.markdown(message["content"])
 
-if not st.session_state['messages']:
+# Display previous messages or welcome message
+if st.session_state['messages']:
+    display_messages()
+else:
     with st.chat_message("assistant"):
         st.markdown(welcome_message)
 
@@ -224,24 +191,18 @@ if not st.session_state['messages']:
 if st.session_state['messages'] and st.session_state['messages'][-1]["role"] == "assistant":
     asyncio.run(handle_feedback())  # Ensure this is only called after assistant's response
 
+
 # User input area using st.chat_input
 if prompt := st.chat_input("What climate-tech solutions do you want to discover today?"):
     # Add user message to session state
     st.session_state['messages'].append({"role": "user", "content": prompt})
-    if st.session_state['solutions_json']:
-        new_chat_message = chat_container.chat_message("user")
-        new_chat_message.markdown(prompt)
-    else:
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
     # Assistant's response
     with st.chat_message("assistant"):
         # Placeholder for the assistant's response
-        if st.session_state['solutions_json']:
-           response_placeholder = chat_container.empty()
-        else:
-            response_placeholder = st.empty()
+        response_placeholder = st.empty()
 
         # Show a spinner while waiting for the assistant's response
         with st.spinner('Thinking about clean & efficient solutions...'):
@@ -249,15 +210,16 @@ if prompt := st.chat_input("What climate-tech solutions do you want to discover 
             async def get_assistant_response():
                 assistant = st.session_state['assistant']
                 thread = st.session_state['thread']
+                client = get_client(url=LANGGRAPH_URL, api_key=API_KEY)
                 run_id = None  # Variable to store the first 'run_id'
 
                 # Only send the latest user message
-                input_data = {"messages": [{'role': 'human', 'content': prompt}]}
+                messages = [{'role': 'human', 'content': prompt}]
+
+                input_data = {"messages": messages}
 
                 response_text = ''
-                solutions_json = ""
                 try:
-                    langgraph_node = ""
                     # Use stream_mode="updates" since "tokens" is not supported
                     async for chunk in client.runs.stream(
                             thread_id=thread["thread_id"],
@@ -273,24 +235,16 @@ if prompt := st.chat_input("What climate-tech solutions do you want to discover 
                             run_id = chunk_data.get("run_id")
                             print(f"Initial run_id captured: {run_id}")
 
-                        elif langgraph_node == "agent" and isinstance(chunk_data, list):
+                        if isinstance(chunk_data, list):
                             if len(chunk_data) > 0:
                                 chunk_data = chunk_data[-1]
                                 if chunk_data.get("content", "") != "" and chunk_data.get('type', "tool") != "tool":
                                     response_text = chunk_data.get("content", "")
                                     response_placeholder.markdown(response_text)
-                        elif not isinstance(chunk_data, list):
-                            first_key = next(iter(chunk_data))
-                            langgraph_node = chunk_data[first_key]["metadata"].get("langgraph_node", "")
-                            print("langgraph_node:", langgraph_node)
-                        elif langgraph_node == "tools":
-                            if chunk_data[-1].get("artifact", None):
-                                solutions_json = chunk_data[-1].get("artifact", None)
 
                 except Exception as e:
                     response_text = f"An error occurred: {e}"
                     response_placeholder.markdown(response_text)
-                    solutions_json = None
 
                 # Once done, add the response to messages
                 st.session_state['messages'].append(
@@ -300,9 +254,6 @@ if prompt := st.chat_input("What climate-tech solutions do you want to discover 
                         "run_id": run_id
                     }
                 )
-                if solutions_json:
-                    st.session_state['solutions_json'] = solutions_json
-                    print(solutions_json)
 
             # Run the asynchronous function synchronously
             asyncio.run(get_assistant_response())
