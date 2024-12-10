@@ -97,7 +97,7 @@ async def handle_feedback() -> None:
 
 # Config options
 with st.sidebar:
-    st.image("logo.svg", use_container_width=True)
+    st.image("logo.svg", use_column_width=True)
     st.markdown("---")
     st.header(f"{APP_ICON} {APP_TITLE}")
     ""
