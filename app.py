@@ -192,7 +192,7 @@ else:
         with st.chat_message(author_name, avatar=avatar):
             st.markdown(message["content"])
 if not st.session_state['messages']:
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar = ":material/robot:"):
         st.markdown(welcome_message)
 
 # Display feedback after assistant's response
