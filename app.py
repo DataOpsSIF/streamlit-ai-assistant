@@ -183,6 +183,7 @@ if st.session_state['messages'] and st.session_state['messages'][-1]["role"] == 
 
 # User input area using st.chat_input
 if prompt := st.chat_input("What climate-tech solutions do you want to discover today?"):
+    st.caption("By messaging AI Assistant, you agree to our [Terms](https://solutions-explorer.gitbook.io/resources/additional-resources/terms-and-conditions) and have read our [Privacy Policy](https://solarimpulse.com/pdf/Solar_Impulse_Foundation_Website_Privacy_Policy_10.2017.pdf).")
     # Add user message to session state
     st.session_state['messages'].append({"role": "user", "content": prompt})
     if st.session_state['solutions_json']:
@@ -265,5 +266,3 @@ if prompt := st.chat_input("What climate-tech solutions do you want to discover 
 
     # Rerun the app to display the new messages
     st.rerun()
-
-st.caption("By messaging AI Assistant, you agree to our [Terms](https://solutions-explorer.gitbook.io/resources/additional-resources/terms-and-conditions) and have read our [Privacy Policy](https://solarimpulse.com/pdf/Solar_Impulse_Foundation_Website_Privacy_Policy_10.2017.pdf).")
