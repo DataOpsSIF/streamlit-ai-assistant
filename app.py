@@ -10,7 +10,8 @@ API_KEY = st.secrets["API_KEY"]
 
 # Initialize the langsmith Client for feedback submissions
 feedback_client = Client(
-    api_url="https://eu.api.smith.langchain.com/"
+    api_url="https://eu.api.smith.langchain.com/",
+    api_key=API_KEY
 )
 
 # Apply nest_asyncio to allow nested event loops
