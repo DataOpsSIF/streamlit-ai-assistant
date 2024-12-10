@@ -167,11 +167,29 @@ with st.sidebar:
 if st.session_state['solutions_json']:
     chat_container = st.container(height=screen_height, border=False)
     for message in st.session_state['messages']:
-        chat_message = chat_container.chat_message("assistant" if message["role"] == "assistant" else "user")
+        if message["role"] in ["assistant", "ai"]:
+            # Use a default AI avatar or a custom icon
+            author_name = "assistant"
+            avatar = ":material/robot:"  # Replace with your preferred avatar
+        else:
+            # User message
+            author_name = "user"
+            avatar = ":material/face:"  # Will use default user avatar
+        
+        #chat_message = chat_container.chat_message("assistant" if message["role"] == "assistant" else "user")
+        chat_message = chat_container.chat_message(author_name, avatar=avatar)
         chat_message.markdown(message["content"])
 else:
     for message in st.session_state['messages']:
-        with st.chat_message("assistant" if message["role"] == "assistant" else "user"):
+        if message["role"] in ["assistant", "ai"]:
+            # Use a default AI avatar or a custom icon
+            author_name = "assistant"
+            avatar = ":material/robot:"  # Replace with your preferred avatar
+        else:
+            # User message
+            author_name = "user"
+            avatar = ":material/face:"  # Will use default user avatar
+        with st.chat_message(author_name, avatar=avatar):
             st.markdown(message["content"])
 if not st.session_state['messages']:
     with st.chat_message("assistant"):
@@ -186,14 +204,14 @@ if prompt := st.chat_input("What climate-tech solutions do you want to discover 
     # Add user message to session state
     st.session_state['messages'].append({"role": "user", "content": prompt})
     if st.session_state['solutions_json']:
-        new_chat_message = chat_container.chat_message("user")
+        new_chat_message = chat_container.chat_message("user",  avatar = ":material/face:")
         new_chat_message.markdown(prompt)
     else:
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar = ":material/face:"):
             st.markdown(prompt)
 
     # Assistant's response
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar = ":material/robot:"):
         # Placeholder for the assistant's response
         if st.session_state['solutions_json']:
            response_placeholder = chat_container.empty()
