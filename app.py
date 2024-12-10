@@ -20,7 +20,7 @@ nest_asyncio.apply()
 
 client = get_client(url=LANGGRAPH_URL, api_key=API_KEY)
 
-APP_TITLE = "AI Cleantech Assistant"
+APP_TITLE = "AI Explorer"
 APP_ICON = "✨"
 
 st.set_page_config(
@@ -97,7 +97,9 @@ async def handle_feedback() -> None:
 
 # Config options
 with st.sidebar:
-    st.header(f"{APP_ICON} {APP_TITLE}")
+    st.image("logo.svg", use_container_width=True)
+    st.markdown("---")
+    st.title(f"{APP_ICON} {APP_TITLE}")
     ""
     "Advanced RAG Assistant for the Solution Explorer, powered by LangChain & Typesense"
     st.markdown("Discover the latest climate tech solutions with our new assistant designed to recommend the best clean & profitable solutions tailored for your needs. Visit the [Solution Explorer](https://solarimpulse.com/solutions-explorer) to discover more solutions.")
@@ -122,9 +124,11 @@ with st.sidebar:
         selected_flag = st.radio("Language to use", options=list(languages.keys()))
         selected_language, welcome_message = languages[selected_flag]
 
+    st.link_button("Solutions Explorer Resources 🌍", "https://solutions-explorer.gitbook.io/resources", use_container_width=True)
+
     with st.popover(":material/policy: Privacy", use_container_width=True):
         st.write(
-            "Prompts, responses and feedback in this app are anonymously recorded and saved to LangSmith for product evaluation and improvement purposes only."
+            "Prompts, responses and feedback in this app are anonymously recorded and saved to LangSmith for product evaluation and improvement purposes only. More info about the general terms and conditions and privacy policy are available [Here](https://app.gitbook.com/o/Op3VdU0fhQCgGVhwv4jx/s/KGAN4ko2qLFQDMJgRgce/additional-resources/terms-and-conditions)"
         )
 
     st.markdown(
@@ -134,7 +138,7 @@ with st.sidebar:
     # Show current language with flag
     st.markdown(f"**Current language selected:** {selected_flag}")
 
-    "[View the source code](https://github.com/DataOpsSIF/ai-explorer)"
+    "[View the source code](https://github.com/DataOpsSIF/streamlit-ai-assistant)"
     st.caption(
         "Made with :material/favorite: by [Solar Impulse Foundation](https://solarimpulse.com/) in Lausanne 🇨🇭"
     )
@@ -267,3 +271,5 @@ if prompt := st.chat_input("What climate-tech solutions do you want to discover 
 
     # Rerun the app to display the new messages
     st.rerun()
+
+st.caption("By messaging AI Assistant, you agree to our [Terms](https://solutions-explorer.gitbook.io/resources/additional-resources/terms-and-conditions) and have read our [Privacy Policy](https://solarimpulse.com/pdf/Solar_Impulse_Foundation_Website_Privacy_Policy_10.2017.pdf).")
