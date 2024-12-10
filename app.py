@@ -124,7 +124,7 @@ with st.sidebar:
         selected_flag = st.radio("Language to use", options=list(languages.keys()))
         selected_language, welcome_message = languages[selected_flag]
 
-    with st.popover(":material/policy: Privacy", use_container_width=True):
+    with st.popover(":material/policy: Terms & Privacy", use_container_width=True):
         st.write(
             "By messaging AI Assistant, you agree to our [Terms](https://solutions-explorer.gitbook.io/resources/additional-resources/terms-and-conditions) and have read our [Privacy Policy](https://solarimpulse.com/pdf/Solar_Impulse_Foundation_Website_Privacy_Policy_10.2017.pdf) Prompts, responses and feedback in this app are anonymously recorded and saved to LangSmith for product evaluation and improvement purposes only. More info about the general terms and conditions and privacy policy are available [Here](https://app.gitbook.com/o/Op3VdU0fhQCgGVhwv4jx/s/KGAN4ko2qLFQDMJgRgce/additional-resources/terms-and-conditions)"
         )
