@@ -99,7 +99,7 @@ async def handle_feedback() -> None:
 with st.sidebar:
     st.image("logo.svg", use_container_width=True)
     st.markdown("---")
-    st.title(f"{APP_ICON} {APP_TITLE}")
+    st.header(f"{APP_ICON} {APP_TITLE}")
     ""
     "Advanced RAG Assistant for the Solution Explorer, powered by LangChain & Typesense"
     st.markdown("Discover the latest climate tech solutions with our new assistant designed to recommend the best clean & profitable solutions tailored for your needs. Visit the [Solution Explorer](https://solarimpulse.com/solutions-explorer) to discover more solutions.")
